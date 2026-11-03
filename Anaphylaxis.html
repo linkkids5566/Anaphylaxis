@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>麻醉重大病安學習島 | 臺中榮總麻訓班</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes dashFlow {
+      from { stroke-dashoffset: 28; }
+      to { stroke-dashoffset: 0; }
+    }
+    .collab-dash {
+      animation: dashFlow 1.8s linear infinite;
+    }
+    @keyframes pulseRing {
+      0%, 100% { r: 32px; opacity: 0.95; }
+      50% { r: 40px; opacity: 0.45; }
+    }
+    .beacon-pulse {
+      animation: pulseRing 1.6s ease-in-out infinite;
+    }
+    .island-group {
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+    }
+    .island-group:hover {
+      transform: translateY(-6px);
+    }
+    .island-selected {
+      transform: translateY(-6px);
+    }
+    /* 自訂捲軸 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.4);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body id="app-body" class="min-h-screen w-full transition-colors duration-700 bg-gradient-to-br from-sky-200 via-cyan-100 to-teal-200 flex flex-col select-none overflow-x-hidden pb-10">
+
+  <!-- ==========================================
+       頂部導航列 (Header)
+       ========================================== -->
+  <header class="sticky top-0 z-30 backdrop-blur-md bg-slate-900/90 border-b border-white/15 px-3.5 py-3 sm:px-6">
+    <div class="max-w-[1600px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      <!-- 左側 Logo 與標題 -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-teal-400 flex items-center justify-center shadow-lg shadow-amber-500/20 border border-white/30 shrink-0">
+          <i class="ph-bold ph-compass text-2xl text-slate-950 animate-pulse"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs sm:text-sm font-bold tracking-wider uppercase px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-400/30">
+              臺中榮總麻訓班
+            </span>
+            <span class="hidden md:inline-flex items-center gap-1 text-xs text-teal-300 bg-teal-950/80 px-2.5 py-0.5 rounded-md border border-teal-500/30">
+              <i class="ph-fill ph-sparkle"></i> 楊士杰醫師簡報 × 課後考點導航
+            </span>
+          </div>
+          <h1 class="text-lg sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2 mt-0.5">
+            麻醉重大病安學習島
+            <span class="text-xs font-normal text-slate-400 hidden sm:inline">
+              ANESTHESIA SAFETY ISLAND
+            </span>
+          </h1>
+        </div>
+      </div>
+
+      <!-- 中間：島嶼探索進度條 -->
+      <div class="hidden xl:flex items-center gap-4 bg-slate-800/90 border border-slate-700 px-4 py-1.5 rounded-full">
+        <div class="flex items-center gap-2 text-sm text-amber-300">
+          <i class="ph-bold ph-medal text-amber-400"></i>
+          <span>中央考點解鎖：</span>
+          <span id="progress-hints" class="font-bold text-white">1 / 5</span>
+        </div>
+        <div class="h-3 w-[1px] bg-slate-600"></div>
+        <div class="flex items-center gap-2 text-sm text-teal-300">
+          <i class="ph-bold ph-navigation-arrow text-teal-400"></i>
+          <span>登陸島嶼：</span>
+          <span id="progress-islands" class="font-bold text-white">1 / 7</span>
+        </div>
+      </div>
+
+      <!-- 右側控制按鈕群 -->
+      <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <!-- 時段光影切換 -->
+        <div class="flex items-center bg-slate-800/90 p-1 rounded-xl border border-slate-700">
+          <button onclick="setTimeOfDay('day')" id="btn-time-day" title="晨會白班模式" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition bg-sky-400 text-slate-950 shadow">
+            <i class="ph-bold ph-sun text-base"></i>
+            <span class="hidden sm:inline">白班</span>
+          </button>
+          <button onclick="setTimeOfDay('dusk')" id="btn-time-dusk" title="交班黃昏模式" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-300 hover:text-white">
+            <i class="ph-bold ph-sun-horizon text-base"></i>
+            <span class="hidden sm:inline">交班</span>
+          </button>
+          <button onclick="setTimeOfDay('night')" id="btn-time-night" title="值班夜班模式" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-300 hover:text-white">
+            <i class="ph-bold ph-moon-stars text-base"></i>
+            <span class="hidden sm:inline">夜班</span>
+          </button>
+        </div>
+
+        <!-- 協作線開關 -->
+        <button onclick="toggleCollabLines()" id="btn-collab" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white">
+          <i class="ph-bold ph-git-branch text-base"></i>
+          <span class="hidden md:inline">病安協作線</span>
+        </button>
+
+        <!-- 地圖 / 清單切換 -->
+        <button onclick="toggleViewMode()" id="btn-view-mode" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-slate-800 border border-slate-600 text-slate-100 hover:bg-slate-700 transition">
+          <i id="icon-view-mode" class="ph-bold ph-list-magnifying-glass text-teal-400 text-base"></i>
+          <span id="text-view-mode">全島頁碼清單</span>
+        </button>
+
+        <!-- 急救劑量計算機 -->
+        <button onclick="openModal('calculator')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-teal-600 hover:bg-teal-500 text-white shadow-md shadow-teal-900/30 transition">
+          <i class="ph-bold ph-calculator text-base"></i>
+          <span>劑量速算</span>
+        </button>
+
+        <!-- 兩大急症對照表 -->
+        <button onclick="openModal('sopCompare')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md transition">
+          <i class="ph-bold ph-stack text-base"></i>
+          <span>急症對照</span>
+        </button>
+
+        <!-- 課後測驗闖關自測 -->
+        <button onclick="openModal('quiz')" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-lg shadow-amber-500/25 transition">
+          <i class="ph-bold ph-check-circle text-base"></i>
+          <span>課後自測驗收</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       主內容區：地圖模式 vs 清單模式
+       ========================================== -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto p-2.5 sm:p-5">
+    <!-- 1. 3D 學習島地圖模式 -->
+    <div id="map-view-container" class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+      <!-- 左側 7 欄：快速選島按鈕面板 + 3D 等距六角漂浮島 SVG -->
+      <div class="lg:col-span-7 flex flex-col gap-3">
+        <!-- 手機友善雙欄/三欄大按鈕島嶼導覽區 -->
+        <div id="island-nav-grid" class="bg-slate-900/90 border border-white/15 rounded-2xl p-2.5 sm:p-3 shadow-lg space-y-2">
+          <!-- 由 JS 動態渲染 -->
+        </div>
+
+        <!-- 3D 視覺化六角群島 SVG 容器 -->
+        <div class="relative w-full rounded-3xl overflow-hidden border-2 border-white/25 shadow-2xl bg-slate-950/30 backdrop-blur-sm">
+          <div id="svg-map-wrapper" class="w-full">
+            <!-- 由 JS 動態渲染 680x760 SVG -->
+          </div>
+
+          <!-- 底部：鳥獸戲畫青蛙醫師 & 兔兔麻護互動廣播吧 -->
+          <div class="bg-slate-950/95 border-t border-white/15 px-4 py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div class="flex items-start sm:items-center gap-3">
+              <button onclick="nextAvatarQuote()" id="avatar-emoji-btn" class="shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-2xl shadow border border-white/30 hover:scale-105 transition" title="點擊切換小精靈提示">
+                🐸
+              </button>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <span id="avatar-speaker" class="text-base font-extrabold text-amber-400"></span>
+                  <span class="text-xs text-slate-400">（投影片 P.1 吉祥物叮嚀）</span>
+                </div>
+                <p id="avatar-text" class="text-base text-slate-100 leading-relaxed mt-1"></p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+              <button onclick="goToAvatarIsland()" class="text-sm px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-teal-300 font-bold transition flex items-center gap-1">
+                <span>前往該島</span>
+                <i class="ph-bold ph-caret-right"></i>
+              </button>
+              <button onclick="nextAvatarQuote()" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-slate-300" title="下一則叮嚀">
+                <i class="ph-bold ph-arrows-clockwise text-base"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右側 5 欄：島嶼詳情與考點提示抽屜 -->
+      <div id="detail-panel-container" class="lg:col-span-5 flex flex-col gap-3">
+        <!-- 由 JS 動態渲染中央大島或六大主題島內容 -->
+      </div>
+    </div>
+
+    <!-- 2. 全島考點與頁碼清單模式 (預設隱藏) -->
+    <div id="list-view-container" class="hidden space-y-4">
+      <div class="rounded-3xl bg-slate-900/95 border border-white/15 p-4 sm:p-6 text-slate-100 shadow-2xl">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+              <i class="ph-bold ph-list-magnifying-glass text-teal-400"></i>
+              全島考點提示與投影片頁碼總覽清單
+            </h2>
+            <p class="text-sm sm:text-base text-slate-400 mt-1">
+              可輸入關鍵字（如：Tryptase、3350、SMOFlipid、鈉離子、Xylocaine、P.11）快速檢索對應投影片頁數
+            </p>
+          </div>
+          <!-- 搜尋框 -->
+          <div class="relative w-full md:w-80">
+            <i class="ph-bold ph-magnifying-glass text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input
+              type="text"
+              id="search-input"
+              oninput="handleSearchInput(this.value)"
+              placeholder="搜尋考點、藥名、分機或頁碼..."
+              class="w-full pl-10 pr-8 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm sm:text-base text-white placeholder-slate-400 focus:outline-none focus:border-teal-400"
+            />
+          </div>
+        </div>
+        <!-- 檢索結果網格 -->
+        <div id="search-results-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
+          <!-- 由 JS 動態渲染 -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==========================================
+       互動彈窗容器 (Modals: 劑量速算 / 急症對照 / 課後自測)
+       ========================================== -->
+  <div id="modal-backdrop" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden items-center justify-center p-3 sm:p-6">
+    <div id="modal-content" class="w-full max-w-4xl"></div>
+  </div>
+
+  <!-- ==========================================
+       JavaScript 資料庫與互動渲染邏輯
+       ========================================== -->
+  <script>
+    // 1. 中央核心考點大島資料庫 (以投影片頁數為主)
+    const CENTER_ISLAND_DATA = {
+      id: 'CENTER',
+      code: 'CORE-EXAM',
+      title: '課後測驗考點雷達島',
+      subtitle: 'Post-Test Hint & Page Navigator Hub',
+      category: '中央核心考點大島',
+      slideRange: '涵蓋全簡報核心考點',
+      color: '#F59E0B',
+      landmarks: [
+        {
+          id: 'HINT-1',
+          badge: '考點提示 #1',
+          name: '術中過敏頭號嫌犯雷達站',
+          shortHint: '佔比 47% 與 33% 的兩大類麻醉期間致敏藥物',
+          slideRef: '投影片 P.11–12',
+          linkedIslandId: 'ISLAND-B',
+          keyHints: [
+            '麻醉期間發生全身性過敏反應（Perioperative Anaphylaxis）發生率約為萬分之一（1 in 10,000）。',
+            '請翻開圓餅圖（投影片 P.11）：哪兩大類藥物分別佔了 47%（第一名）與 33%（第二名），合計佔所有麻醉中藥物過敏的 80%？',
+            '延伸思考（投影片 P.12）：在第二名的藥物類別中，哪兩支藥物的交叉反應率（Cross-reactivity）最高？高達 56% 確診病人對哪支藥物過敏？'
+          ],
+          clinicalClue: '提示關鍵字：術前預防性給予的「抗感染藥物」＋插管時讓聲帶放鬆的「神經肌肉阻斷劑」。',
+          instructorSecret: {
+            conceptTarget: '抗生素 (Antibiotics, 47%) 與 肌肉鬆弛劑 (Muscle relaxants, 33%)',
+            deepDive: '根據 NAP6 統計（投影片 P.11–12），抗生素（47%）與肌肉鬆弛劑（33%，其中 Succinylcholine 與 Rocuronium 最常見）是麻醉中最常見引起過敏反應的兩大類藥物；第三名為 Chlorhexidine（9%），第四名為 Patent Blue 染劑（5%）。'
+          }
+        },
+        {
+          id: 'HINT-2',
+          badge: '考點提示 #2',
+          name: '過敏性休克救命首選塔',
+          shortHint: '同時具備「擴張氣道、收縮血管、強心」的第一線藥物',
+          slideRef: '投影片 P.16–17, P.20–21',
+          linkedIslandId: 'ISLAND-C',
+          keyHints: [
+            '過敏性休克發作時，10–15 分鐘內會有 35–70% 血液滲出血管外，且伴隨支氣管痙攣與氣道水腫。',
+            '面對如此危急的休克，哪一種藥物是唯一能同時「擴張呼吸道、收縮血管、強心」的首要第一線救命藥物（First-line treatment）？',
+            '請區分：抗組織胺（Diphenhydramine）、類固醇（Methylprednisolone）與支氣管擴張劑（Albuterol）屬於第幾線輔助角色？'
+          ],
+          clinicalClue: '提示關鍵字：安得理那寧（Adrenalin / 腎上腺素），請同步熟記 Moderate (10-20mcg) 與 Life-threatening (100-200mcg) 的泡法！',
+          instructorSecret: {
+            conceptTarget: '腎上腺素 (Epinephrine / Adrenaline)',
+            deepDive: '懷疑過敏性休克時（投影片 P.16–17, P.20），首要治療藥物絕對是 Epinephrine IV bolus（或大腿外側 IM 500mcg）。類固醇、抗組織胺與支氣管擴張劑皆為二線輔助治療，無法在第一時間逆轉嚴重低血壓與氣道阻塞。'
+          }
+        },
+        {
+          id: 'HINT-3',
+          badge: '考點提示 #3',
+          name: '黃金 60 分鐘生化檢驗鐘樓',
+          shortHint: '發作後 45–60 分鐘達高峰 (Peak) 的肥大細胞指標',
+          slideRef: '投影片 P.13, P.19–20',
+          linkedIslandId: 'ISLAND-A',
+          keyHints: [
+            '當 IgE 與過敏原結合活化肥胖細胞（Mast cell）脫顆粒時，除了釋放組織胺（Histamine），還會大量釋放哪一種蛋白酶進入血液？',
+            '檢視濃度時間曲線圖（投影片 P.13）：哪一項血液檢測指標會在過敏發作後 45–60 分鐘（0.5–1.5 小時）達到最高峰（> 10 ng/ml），半衰期約 1.5–2.5 小時？',
+            '中榮實務連結（投影片 P.20）：為什麼麻護抽黃紅頭管 5ml 必須分 T1（2小時內）與 T2（24–48小時後）兩次採檢？'
+          ],
+          clinicalClue: '提示關鍵字：工作車藥櫃內的「過敏抽血包」要開哪一張檢驗單？（開頭為 β-類胰蛋白酶...）',
+          instructorSecret: {
+            conceptTarget: 'β-tryptase（β-類胰蛋白酶）',
+            deepDive: 'β-tryptase（或總類胰蛋白酶 Total tryptase > 10 ng/ml）在過敏反應開始後 45–60 分鐘（0.5–1.5h）達到高峰（投影片 P.13, P.19）。因此 T1 需在發作 2 小時內抽血捕獲峰值，T2 於 24–48 小時後抽血作為基準值對照。'
+          }
+        },
+        {
+          id: 'HINT-4',
+          badge: '考點提示 #4',
+          name: '神經軸突離子通道閘門',
+          shortHint: '局部麻醉藥結合在細胞膜哪種通道以阻斷去極化？',
+          slideRef: '投影片 P.27–33',
+          linkedIslandId: 'ISLAND-D',
+          keyHints: [
+            '複習神經傳導生理（投影片 P.27–30）：神經細胞靜止膜電位為 -70mV（外正內負）。當受到疼痛（PAIN）刺激時，哪一種離子通道會打開，讓正電荷進入細胞內產生「去極化（Depolarization）」？',
+            '局部麻醉藥（Local Anesthetics）進入神經後（投影片 P.32–33），會從細胞質側（Cytoplasmic surface）更緊密地結合在「不活化態（Inactivated state）」的哪一種離子通道上？',
+            '當該通道持續關閉，哪種正電離子無法進入神經，進而使動作電位中斷、痛覺無法傳到大腦？'
+          ],
+          clinicalClue: '提示關鍵字：區分「去極化開門的離子」與「再極化出門的離子（K+）」，局麻藥鎖住的是負責去極化的那個大門！',
+          instructorSecret: {
+            conceptTarget: '與鈉離子通道（Voltage-gated Na+ channel）結合使其持續關閉',
+            deepDive: '局部麻醉藥主要機轉為可逆性地結合在不活化態的「電壓門控鈉離子通道（Na+ channel）」（投影片 P.32–33），使其持續關閉，阻斷 Na+ 正電荷流入神經細胞，抑制去極化與動作電位傳導。'
+          }
+        },
+        {
+          id: 'HINT-5',
+          badge: '考點提示 #5',
+          name: 'PCA 鐵櫃最右邊的解毒神藥庫',
+          shortHint: '包覆局麻藥帶往肝臟與肌肉代謝的白色乳劑療法',
+          slideRef: '投影片 P.40–42, P.45',
+          linkedIslandId: 'ISLAND-F',
+          keyHints: [
+            '當局部麻醉藥全身毒性（LAST）引發嚴重中樞神經症狀（耳鳴、舌麻、癲癇）或心臟血管毒性（心律不整、休克、心跳停止）時，最重要的救命解毒治療是什麼？',
+            '它的作用機轉為何？（投影片 P.41 提示：形成「脂肪粒子計程車」，包住脂溶性的局部麻醉藥 LA，將其從心臟與大腦帶往肝臟與肌肉代謝）。',
+            '中榮實務必背（投影片 P.40, P.45）：這罐 20% 救命乳劑（250ml/瓶）放在手術室哪裡？初始 Bolus（ml/kg）與 Continuous infusion（ml/kg/hr）劑量怎麼給？'
+          ],
+          clinicalClue: '提示關鍵字：放在「PCA 鐵櫃裡最右邊鐵箱」的 20% 白色乳劑（SMOFlipid 20%）！',
+          instructorSecret: {
+            conceptTarget: '脂肪復甦療法 (Lipid emulsion therapy, 20% SMOFlipid)',
+            deepDive: '局部麻醉藥中毒（LAST）最重要的救命治療為 20% 脂肪乳劑（Lipid emulsion，投影片 P.40–42）：立即給予 Bolus 1.5 ml/kg IV（2–3分鐘內），接續 Continuous infusion 15 ml/kg/hr，最大劑量 12 ml/kg。'
+          }
+        }
+      ]
+    };
+
+    // 2. 環繞六大課程主題島嶼
+    const SURROUNDING_ISLANDS = [
+      {
+        id: 'ISLAND-A',
+        title: '免疫風暴與臨床表現島',
+        shortLines: ['免疫風暴與', '臨床表現島'],
+        category: '過敏生理與診斷',
+        slideRange: '投影片 P.3–9, P.13–15',
+        color: '#EC4899',
+        themeBg: 'from-pink-500 to-rose-600',
+        examHintRef: ['HINT-2', 'HINT-3'],
+        summary: '探索 IgE 如何活化肥胖細胞引發全身微血管滲漏風暴，掌握臨床三大診斷準則與術中過敏首發徵象（Hypotension & High Airway Pressure）。',
+        buildings: [
+          {
+            name: '肥胖細胞脫顆粒實驗室',
+            slide: 'P.3–5',
+            tag: '致病機轉',
+            points: [
+              '首次接觸過敏原 → B 細胞產生「過敏原特異型免疫球蛋白 E (allergen-specific IgE)」，結合於肥胖細胞 (Mast cell) 與嗜鹼性球 (Basophil) 表面受體（致敏 Sensitization）。',
+              '再次接觸相同過敏原 → 過敏原橋接兩個 IgE 抗體 → 細胞脫顆粒釋放發炎介質（Histamine 組織胺、Leukotriene 白三烯素、Tryptase 類胰蛋白酶）。',
+              '微血管擴張且通透性劇增 → 局部產生蕁麻疹 (Urticaria)、血管性水腫，嚴重時引發氣道阻塞與休克。'
+            ]
+          },
+          {
+            name: '10分鐘血管滲漏警戒塔',
+            slide: 'P.6–8',
+            tag: '致命併發症',
+            points: [
+              '驚人滲出速度：在過敏性休克發作的 10–15 分鐘內，高達 35–70% 的血液會滲透出血管外 (Extravasate)！',
+              '心血管崩潰：血管內容積瞬間掏空 → 嚴重低血壓、冠狀動脈灌流不足 → 心肌梗塞 (Myocardial Infarction) 與昏迷。',
+              '呼吸道危機：喉頭與氣管黏膜水腫 → 呼吸道阻塞 (Obstruction) → 呼吸衰竭甚至死亡。',
+              '台灣本土數據（健保資料庫 2005–2012）：過敏性休克住院發生率約 12.71–13.23 / 百萬人，死亡率約 1.08%。'
+            ]
+          },
+          {
+            name: '臨床診斷三大準則審判庭',
+            slide: 'P.9, P.20',
+            tag: '診斷標準',
+            points: [
+              '【準則 1】急性發作（數分至數小時）之皮膚/黏膜症狀（蕁麻疹、發癢潮紅、唇舌懸壅垂水腫），合併任 1 項：(a) 呼吸窘迫/支氣管痙攣/低血氧；(b) 低血壓或循環虛脫；(c) 器官功能異常（昏厥、失禁、低張）。',
+              '【準則 2】接觸疑似過敏原後急性發生 下列 4 項中至少 2 項：(1) 皮膚黏膜病徵 (2) 呼吸系統損害 (3) 低血壓或相關症狀 (4) 持續腸胃道痙攣或嘔吐。',
+              '【準則 3】暴露已知過敏原後快速發生低血壓：成人 SBP < 90 mmHg 或較基準下降 > 30%；1個月–1歲 < 70 mmHg；1–10歲 < 70 + (2 × 年齡) mmHg。'
+            ]
+          },
+          {
+            name: 'NAP6 術中表現觀測站',
+            slide: 'P.13–15',
+            tag: '臨床表現與檢驗',
+            points: [
+              '【首發徵象 First Sign (NAP6 266例)】：麻醉中病人被布單蓋住，皮膚紅疹常不是第一個發現的！首發徵象第一名為 低血壓 Hypotension (46%)，第二名為 支氣管痙攣/氣道壓升高 Bronchospasm/High airway pressure (18%)，第三名為心跳快 Tachycardia (10%)，皮膚潮紅/紅疹僅佔首發的 8%！',
+              '【整體表現 Overall Signs】：整個病程中 100% 出現低血壓、>70% 出現皮膚紅疹/水腫、49% 氣道壓升高、15% 演變為心跳停止 (Cardiac arrest)、死亡率 3.8%。',
+              '【Tryptase 動力學】：β-tryptase 於發作後 0.5–1.5 小時（45–60 分鐘）達高峰（>10 ng/ml），半衰期 1.5–2.5 小時（對應考點 #3）。'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'ISLAND-B',
+        title: '麻醉過敏原偵探島',
+        shortLines: ['麻醉過敏原', '偵探島'],
+        category: '誘發藥物與交叉反應',
+        slideRange: '投影片 P.10–12',
+        color: '#8B5CF6',
+        themeBg: 'from-violet-500 to-purple-600',
+        examHintRef: ['HINT-1'],
+        summary: '解密麻醉期間萬分之一過敏機率的四大元兇排行榜，剖析肌肉鬆弛劑（NMBDs）之間的交叉過敏率與食藥署過敏原標示規範。',
+        buildings: [
+          {
+            name: '術中過敏原排行榜博物館',
+            slide: 'P.11',
+            tag: '必考排行榜',
+            points: [
+              '麻醉期間過敏發生率（Incidence of perioperative anaphylaxis）：約 1 / 10,000 次麻醉。',
+              '🥇 第一名：抗生素 Antibiotics (47%) —— 為最常見的誘發藥物（如 Cephazolin、Penicillin 等）。',
+              '🥈 第二名：肌肉鬆弛劑 Muscle relaxants (33%) —— 神經肌肉阻斷劑（NMBDs）。',
+              '🥉 第三名：Chlorhexidine 克洛己辛消毒水 (9%) —— 常存在於皮膚消毒液、CVC 塗層或導尿管凝膠。',
+              '🏅 第四名：Patent Blue dye 專利藍染劑 (5%) —— 常用於乳癌前哨淋巴結定位手術。'
+            ]
+          },
+          {
+            name: 'NMBDs 交叉反應基因庫',
+            slide: 'P.12',
+            tag: '肌鬆劑選藥',
+            points: [
+              '當病人對某一種肌肉鬆弛劑過敏時，對其他 NMBDs 常具有「交叉反應（Cross-reactivity）」（因皆含四級銨結構）。',
+              '交叉反應率由高至低排序：Succinylcholine (~47%) > Rocuronium (~32%) > Vecuronium (~28%) > Pancuronium (~21%) > Atracurium (~17%) > Cisatracurium (~10% 最低)。',
+              '圖表特別註記：高達 56% 的肌鬆劑過敏病患被確診為 Rocuronium 過敏！臨床上若懷疑 NMBD 過敏，Cisatracurium 的交叉反應比例相對最低。'
+            ]
+          },
+          {
+            name: '食藥署 11+4 食品過敏原哨站',
+            slide: 'P.10',
+            tag: '術前病史詢問',
+            points: [
+              '衛福部食藥署自 109 年 7 月 1 日起強制標示 11 項食品過敏原：(1)甲殼類 (2)芒果 (3)花生 (4)牛奶/羊奶 (5)蛋 (6)堅果類 (7)芝麻 (8)含麩質之穀物 (9)大豆 (10)魚類 (11)亞硫酸鹽類（二氧化硫殘留 ≥ 10 mg/kg）。',
+              '另有 4 項建議標示：奇異果、頭足類、螺貝類、種子類。術前麻訪時詢問食物與藥物過敏史有助於提高警覺！'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'ISLAND-C',
+        title: '過敏急救與中榮流程島',
+        shortLines: ['過敏急救與', '中榮流程島'],
+        category: '過敏急救與醫護協作',
+        slideRange: '投影片 P.16–22, P.44',
+        color: '#EF4444',
+        themeBg: 'from-red-500 to-rose-600',
+        examHintRef: ['HINT-2', 'HINT-3'],
+        summary: '實戰演練 Epinephrine 依嚴重度分級泡法、晶體輸液補充策略，以及臺中榮總麻醉部專屬「過敏抽血包 T1/T2 送檢與交班 SOP」。',
+        buildings: [
+          {
+            name: '腎上腺素分級泡製軍火庫',
+            slide: 'P.16–17, P.21',
+            tag: '考點 #2 核心',
+            points: [
+              '【藥理三大神效】Epinephrine (Adrenalin 1mg/1ml) 是過敏性休克首要治療：1. 呼吸道支氣管擴張 2. 血管收縮升壓 3. 強心作用。',
+              '🟡 Surprising / Moderate（中度）：Bolus 10–20 mcg IV（泡法：1 mg 加進 100 ml 生理食鹽水袋 = 10 mcg/ml）。',
+              '🟠 Bad / Life-threatening（危及生命）：Bolus 100–200 mcg IV（泡法：1 mg 抽進 10 ml NS 針筒 = 1:10,000 = 100 mcg/ml）。',
+              '🔴 Terrible / Cardiac Arrest（心跳停止）：Bolus 1 mg IV 原液直接推注，並立刻準備下一支！',
+              '🟣 Infusion stage（已給 3 次以上 Bolus 需持續滴注）：3 mg 加在 50 ml NS = 60 mcg/ml（此時 Syringe pump 設定 ml/hr 數值即等於 mcg/min，在開刀房最直覺好算！）。',
+              '🔵 無 IV 或監測有限時（IM 肌肉注射）：500 mcg (0.5 ml 原液 1:1000) 打在大腿前外側 (Upper outer thigh)。'
+            ]
+          },
+          {
+            name: '高速晶體輸液與二線藥補給站',
+            slide: 'P.18',
+            tag: '輸液與二線藥',
+            points: [
+              '【大量晶體輸液 Crystalloid】：因 35–70% 血液在 10–15 分鐘內外滲，需立刻給予生理食鹽水 (0.9% NaCl) 或乳酸林格氏液 (Lactated Ringer’s)。',
+              '成人立即劑量：2L Crystalloid 快速輸注（兒童 20 ml/kg）；若為頑固型低血壓 (Refractory)：成人可達 50 ml/kg（兒童 20–40 ml/kg）。',
+              '⚠️ 重要陷阱：膠體輸液 (Colloid) 本身也可能引起過敏反應，急救時優先選用 Crystalloid！',
+              '【呼吸與二線輔助藥物】：100% 高流量氧氣維持 SpO2 ≥ 90%、支氣管擴張劑（Albuterol / Salbutamol 噴霧或 Ipratropium）、抗組織胺（Diphenhydramine IV）、類固醇（Methylprednisolone 80–125 mg IV）。'
+            ]
+          },
+          {
+            name: '中榮麻護抽血與交班指揮中心',
+            slide: 'P.20, P.44',
+            tag: '中榮麻護必背 SOP',
+            points: [
+              '🚨 Step 0 啟動求救：Call for help，去工作室藥櫃內拿取「升壓劑＋過敏抽血包」，給予 Epinephrine IV bolus。',
+              '💉 麻護任務 1（抽 T1 檢體）：抽血 5 ml 於黃紅頭管（for Tryptase-T1），連同檢驗單送檢：\n  • 上班時間：請班長立刻送門診後棟 3F / AIR 過敏免疫風濕科實驗室（分機：3350）。\n  • 值班時間：送檢前先電話通知檢驗部（分機：4570），請班長親交檢體給檢驗部人員。',
+              '📝 麻護任務 2（品管紀錄）：於麻醉單右下角勾選紀錄「麻醉異常報告 (QA)」。',
+              '🤝 麻護任務 3（T2 標本袋交班）：將 Tryptase-T2 檢驗單及黃紅頭管×1 置入標本袋，黏在病歷上，交班給恢復室（提醒於 T1 抽完後 24–48 小時完成 T2 抽血）。'
+            ]
+          },
+          {
+            name: '醫師開單與藥害救濟服務處',
+            slide: 'P.20, P.22, P.44',
+            tag: '醫師協作與後續',
+            points: [
+              '👨‍⚕️ 醫師開單（建議於恢復室開單列印）：\n  1. Tryptase 檢驗單共 2 張（內外科部 → 過敏免疫風濕 → Allergy → Tryptase，勾選健保適應症）。\n  2. 人體生物資料庫共 3 張（獨立科部 → 醫學研究部 → 抽血單×2 + 同意書×1；印出後直接放沈部長桌上，不需給病人簽名，也不需抽血）。',
+              '💻 通報與會診：醫令系統上方登錄「藥物不良反應 (ADR)」，詳細註記至過敏發生為止所有曾使用的藥物（含 irrigation 沖洗液）及醫材（CVC、Latex 乳膠手套等），並指定普通會診 AIR 陳怡行主任。',
+              '🏥 出院後追蹤與藥害救濟：轉介風濕免疫科門診抽血測過敏原；衛福部藥害救濟給付標準（死亡最高 200 萬、極重度障礙 150–200 萬、嚴重疾病最高 60 萬）。'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'ISLAND-D',
+        title: '神經電網與局麻藥理島',
+        shortLines: ['神經電網與', '局麻藥理島'],
+        category: '局麻作用機轉與極量',
+        slideRange: '投影片 P.25–35',
+        color: '#06B6D4',
+        themeBg: 'from-cyan-500 to-teal-600',
+        examHintRef: ['HINT-4'],
+        summary: '深入神經軸突觀察靜止膜電位與鈉鉀離子通道運作，理解局部麻醉藥如何鎖死鈉離子通道，並學會計算 2% Xylocaine 的安全極量。',
+        buildings: [
+          {
+            name: '軸突電網與鈉離子通道閘門',
+            slide: 'P.27–33',
+            tag: '考點 #4 核心',
+            points: [
+              '⚡ 靜止膜電位 (Resting Potential, -70mV)：離子通道關閉，藉由鈉鉀幫浦維持「神經外帶正電 (Na+ 多)、神經內帶負電 (K+ 多，內負外正)」。',
+              '🔥 去極化 (Depolarization) 與動作電位：受到疼痛刺激時，電壓門控鈉離子通道 (Voltage-gated Na+ channel) 打開 → Na+ 正電荷大量湧入神經內（變成外負內正）→ 產生動作電位沿軸突傳導；接著鉀離子通道打開 K+ 外流完成「再極化 (Repolarization)」。',
+              '🔒 局部麻醉藥作用機轉：局麻藥穿過細胞膜，由細胞質側結合在「不活化態 (Inactivated state)」的鈉離子通道上 → 使鈉離子通道持續關閉 → Na+ 正電荷無法進入神經 → 動作電位中斷！',
+              '🎯 臨床特性：對「較細且有髓鞘 (Small & Myelinated)」神經阻斷更快；具頻率依賴性（放電越快越易被阻斷）；阻斷順序為痛覺/溫覺先消失，大劑量才影響觸覺、壓覺與運動功能。若組織發炎或缺氧（pH↓ 偏酸），局麻藥較難穿膜，效果會變差。'
+            ]
+          },
+          {
+            name: 'Ester 酯類 vs Amide 醯胺類雙子星塔',
+            slide: 'P.34',
+            tag: '藥物分類比較',
+            points: [
+              '🧪 Esters（酯類，藥名中間只有 1 個 "i"）：\n  • 代表藥物：Procaine (Novocaine)、Chloroprocaine、Cocaine、Tetracaine。\n  • 代謝途徑：在血漿 (Plasma) 中由假性膽鹼酯酶 (Pseudocholinesterase) 快速代謝。\n  • 過敏風險：代謝產物含 PABA，過敏反應相對較高（Low，但高於 Amide）。',
+              '🧬 Amides（醯胺類，藥名在 -caine 前有 2 個 "i"）：\n  • 代表藥物：Lidocaine (Xylocaine)、Mepivacaine、Prilocaine、Bupivacaine、Ropivacaine。\n  • 代謝途徑：在肝臟 (Liver) 經由微粒體酵素 (Microsomal enzymes) 代謝。\n  • 過敏風險：極少過敏 (Very low)！臨床上病人自稱對局麻藥過敏，多數其實是打到血管引起的心悸或局部麻藥毒性 (LAST)。'
+            ]
+          },
+          {
+            name: '2% Xylocaine 極量試算所',
+            slide: 'P.35',
+            tag: '劑量安全紅線',
+            points: [
+              '📊 常見局部麻醉藥最大安全劑量 (Max Dose, mg/kg)：\n  • Lidocaine / Mepivacaine：純藥 4.5 mg/kg（若含 Epinephrine 為 7 mg/kg），作用時間 0.75–2 hr。\n  • Bupivacaine / Ropivacaine：極量 3 mg/kg，長效 1.5–8 hr（Bupivacaine 心臟毒性最強！）。\n  • Prilocaine：8 mg/kg；Chloroprocaine / Procaine：12 mg/kg；Cocaine / Tetracaine：3 mg/kg。',
+              '🧮 臨床必算（以 2% Xylocaine 一瓶 20ml 為例）：\n  • 2% 代表 20 mg/ml → 一整瓶 20ml 含有 400 mg Lidocaine！\n  • 60 公斤成人中毒劑量：60 × 4.5 = 270 mg（約 13.5 ml）！也就是說，不用打完一罐 20ml，只要打超過 13.5ml（無 Epi）就可能超過安全極量引發中毒！（含 Epi 則為 60 × 7 = 420 mg）。'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'ISLAND-E',
+        title: '局麻中毒風暴島 (LAST)',
+        shortLines: ['局麻中毒風暴島', '(LAST)'],
+        category: '吸收風險與中毒症狀',
+        slideRange: '投影片 P.36–39',
+        color: '#F97316',
+        themeBg: 'from-orange-500 to-amber-600',
+        examHintRef: ['HINT-4', 'HINT-5'],
+        summary: '掌握「血流越豐富越易中毒」的注射部位排行榜，並追蹤血中局麻藥濃度上升時，從舌尖麻木、耳鳴、癲癇一路惡化至心跳停止的警訊。',
+        buildings: [
+          {
+            name: '注射部位血管豐富度天梯',
+            slide: 'P.37–38',
+            tag: '高風險部位',
+            points: [
+              '🩸 黃金定律：注射部位血流越豐富 (Vascularity 越高)，全身吸收越快，越容易發生局麻中毒 (LAST)！',
+              '📈 中毒風險由最高至最低排序：\n  1. IV (誤入靜脈) — 最高危！\n  2. Tracheal (氣管內黏膜噴霧)\n  3. Intercostal (肋間神經阻斷)\n  4. Caudal (尾椎硬膜外)\n  5. Paracervical (子宮頸旁)\n  6. Epidural (硬脊膜外)\n  7. Brachial plexus (臂神經叢阻斷) — 注意腋下充滿腋動脈、肩胛下動脈等豐富血管網，極易誤入血管或快速吸收！\n  8. Sciatic / Femoral (坐骨/股神經)\n  9. Subcutaneous (皮下組織浸潤) — 最低。'
+            ]
+          },
+          {
+            name: 'CNS → CV 血中濃度毒性演進塔',
+            slide: 'P.36, P.39',
+            tag: '早期警訊辨識',
+            points: [
+              '🧠 第一階段：中樞神經毒性 (CNS Toxicity，隨 Lidocaine 血中濃度上升依序出現)：\n  • ~4 μg/mL（早期前驅警訊）：舌頭與嘴唇麻木 (Numbness of tongue/lips)、頭暈 (Lightheadedness)、金屬味。\n  • ~6–8 μg/mL：耳鳴 (Tinnitus)、視覺與聽覺異常、口齒不清 (Slurred speech)、胡言亂語、焦躁不安。\n  • ~8–10 μg/mL：肌肉抽搐 (Muscular twitching)、震顫 (Tremors)。\n  • ~10–12 μg/mL：意識喪失 (Unconsciousness)、全身性癲癇發作 (Convulsions / Seizures)。\n  • ~16–20 μg/mL：深度昏迷 (Coma)、呼吸抑制與呼吸停止 (Respiratory arrest)。',
+              '💔 第二階段：心臟血管毒性 (Cardiovascular Toxicity，> 20–24 μg/mL 或高毒性 Bupivacaine 直接發生)：\n  • 胸痛、喘不過氣、嚴重低血壓、傳導阻滯、惡性心律不整 (Arrhythmias)，最終導致 心跳停止 (Cardiac arrest)！'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'ISLAND-F',
+        title: '脂肪救援與中榮 LAST 決策島',
+        shortLines: ['脂肪救援與', '中榮 LAST 島'],
+        category: '脂肪復甦與用藥禁忌',
+        slideRange: '投影片 P.40–42, P.45',
+        color: '#10B981',
+        themeBg: 'from-emerald-500 to-teal-600',
+        examHintRef: ['HINT-5'],
+        summary: '熟記 PCA 鐵櫃最右邊鐵箱的「20% SMOFlipid」脂肪復甦療法劑量公式，以及 LAST 急救時「Epinephrine 減量」與「四大絕對禁用藥物」守則！',
+        buildings: [
+          {
+            name: 'PCA 鐵櫃最右邊：SMOFlipid 20% 補給站',
+            slide: 'P.40–41, P.45',
+            tag: '考點 #5 核心',
+            points: [
+              '🧴 解毒神藥位置：中榮手術室 20% Lipid emulsion (SMOFlipid 20%, 250ml/瓶) 存放於 「PCA 鐵櫃裡最右邊鐵箱」！一有嚴重 CNS 或 CV 中毒症狀應立即拿取施打！',
+              '🚕 脂肪復甦療法機轉 (Lipid Sink / Shuttle)：靜脈注入的 20% 脂肪粒子會在血管內包覆高脂溶性的局部麻醉藥分子 (LA)，將其從心臟 (Heart) 與大腦 (Brain) 抽離，並帶往肝臟 (Liver) 與肌肉 (Muscle) 儲存與代謝！',
+              '💉 標準給藥公式（依理想體重 Lean BW 計算）：\n  1. 初始 Bolus：1.5 ml/kg IV，於 2–3 分鐘內推完（若 CPR 中可再重複給一劑 Bolus）。\n  2. 持續滴注 Continuous Infusion：15 ml/kg/hr（若持續低血壓，速率可加倍為 30 ml/kg/hr；血行動力穩定後需繼續給至少 10 分鐘）。\n  3. 最大累積上限劑量：12 ml/kg。\n  • 💡 60 kg 成人速查：Bolus 90 ml → Infusion 900 ml/hr → 最大上限 720 ml（約 3 瓶）。'
+            ]
+          },
+          {
+            name: '癲癇壓制與鎮定劑選擇塔',
+            slide: 'P.40, P.45',
+            tag: '癲癇控制守則',
+            points: [
+              '🧠 首選抗癲癇藥物：Midazolam (0.05–0.1 mg/kg IV)（如 60kg 成人給 3–6 mg [3–6 ml]），或 Citosol (Thiopental 2 mg/kg, 50–200 mg) 徐徐注入直到抽搐緩解。',
+              '⚠️ Propofol 陷阱：Propofol (1 mg/kg) 雖能抗癲癇且含 10% 脂質，但「絕對不適用」於血行動力學不穩（低血壓/心律不整）的病患，且其脂質濃度無法取代 20% SMOFlipid！',
+              '⚠️ Succinylcholine (50 mg) 注意事項：若以上無效給予肌鬆劑，雖表面上「看不到肢體抽動」，但大腦內部神經元仍在異常放電、處於高耗氧與酸中毒狀態，務必確保氣道暢通（100% O2）並搭配鎮定劑！'
+            ]
+          },
+          {
+            name: 'LAST 心律不整與強心禁忌雷區',
+            slide: 'P.40, P.42, P.45',
+            tag: '生死用藥禁忌',
+            points: [
+              '⚡ 關鍵差異：Epinephrine 劑量必須大幅減少 (≤ 1 mcg/kg)！\n  • 不同於過敏性休克或一般 ACLS 一次推 1mg，在 LAST 中毒時高劑量 Epinephrine 會惡化心律不整並干擾脂肪乳劑救命效果！\n  • 務必減量至 ≤ 1 mcg/kg（例如 60kg 成人每次 ≤ 60 mcg，即稀釋成 10 mcg/ml 後抽 ≤ 6 ml）。',
+              '💓 抗心律不整首選：Amiodarone（Bolus 150 mg，接續 Infusion 1 mg/min 維持 6 小時）。',
+              '🚫 四大絕對避免藥物 (AVOID)：\n  1. 避免 Vasopressin（血管加壓素）\n  2. 避免 β-blocker（乙型阻斷劑）\n  3. 避免 Calcium channel blocker（鈣離子通道阻斷劑）\n  4. 避免其他 Local anesthetic（不可再用 Lidocaine 治療心室心律不整！）',
+              '🫁 終極支援：頑固性休克或心跳停止時，及早通知 ECMO team（葉克膜體外循環：股靜脈引血 → 人工氧合器 → 股動脈輸回）爭取代謝時間！'
+            ]
+          }
+        ]
+      }
+    ];
+
+    // 3. 跨島病安協作線
+    const COLLABORATION_LINES = [
+      { id: 'LINE-1', from: 'CENTER', to: 'ISLAND-B', color: '#A855F7' },
+      { id: 'LINE-2', from: 'CENTER', to: 'ISLAND-C', color: '#EF4444' },
+      { id: 'LINE-3', from: 'CENTER', to: 'ISLAND-A', color: '#EC4899' },
+      { id: 'LINE-4', from: 'CENTER', to: 'ISLAND-D', color: '#06B6D4' },
+      { id: 'LINE-5', from: 'CENTER', to: 'ISLAND-F', color: '#10B981' },
+      { id: 'LINE-6', from: 'ISLAND-A', to: 'ISLAND-C', color: '#F43F5E' },
+      { id: 'LINE-7', from: 'ISLAND-D', to: 'ISLAND-E', color: '#F97316' },
+      { id: 'LINE-8', from: 'ISLAND-E', to: 'ISLAND-F', color: '#14B8A6' }
+    ];
+
+    // 4. 課後測驗自測題庫
+    const POST_TEST_QUESTIONS = [
+      {
+        qNum: 1,
+        hintBadge: '對應中央大島【考點提示 #1】',
+        slideRef: '投影片 P.11',
+        question: '1. 麻醉中最常見引起過敏反應的藥物是：',
+        options: [
+          { key: 'A', text: 'A. 抗生素與肌肉鬆弛劑' },
+          { key: 'B', text: 'B. 吸入性麻醉藥' },
+          { key: 'C', text: 'C. 鎮痛劑' },
+          { key: 'D', text: 'D. 抗膽鹼藥' }
+        ],
+        answer: 'A',
+        explanation: '根據投影片 P.11，麻醉期間最常見引起過敏反應的誘發物依序為：抗生素 Antibiotics (47%) 與 肌肉鬆弛劑 Muscle relaxants (33%)，兩者合佔 80%！'
+      },
+      {
+        qNum: 2,
+        hintBadge: '對應中央大島【考點提示 #2】',
+        slideRef: '投影片 P.16–17, P.20',
+        question: '2. 過敏性休克的首要治療藥物是：',
+        options: [
+          { key: 'A', text: 'A. 類固醇' },
+          { key: 'B', text: 'B. 抗組織胺' },
+          { key: 'C', text: 'C. 腎上腺素 (Epinephrine)' },
+          { key: 'D', text: 'D. 支氣管擴張劑' }
+        ],
+        answer: 'C',
+        explanation: '根據投影片 P.16 & P.20，腎上腺素 (Epinephrine) 具備呼吸道擴張、血管收縮、強心三大作用，是過敏性休克唯一的首要第一線救命藥物；類固醇、抗組織胺與支氣管擴張劑皆為二線輔助治療。'
+      },
+      {
+        qNum: 3,
+        hintBadge: '對應中央大島【考點提示 #3】',
+        slideRef: '投影片 P.13, P.19',
+        question: '3. 過敏反應後血液檢測中，哪一項在 45-60 分鐘內達到高峰？',
+        options: [
+          { key: 'A', text: 'A. 血糖' },
+          { key: 'B', text: 'B. β-tryptase' },
+          { key: 'C', text: 'C. 白蛋白' },
+          { key: 'D', text: 'D. 尿酸' }
+        ],
+        answer: 'B',
+        explanation: '根據投影片 P.13 & P.19，β-類胰蛋白酶 (β-tryptase) 在過敏反應開始後的 45–60 分鐘（0.5–1.5 小時）內達到高峰（> 10 ng/ml），因此中榮流程規定 T1 必須在過敏發生後 2 小時內抽黃紅頭管 5ml 送檢。'
+      },
+      {
+        qNum: 4,
+        hintBadge: '對應中央大島【考點提示 #4】',
+        slideRef: '投影片 P.32–33',
+        question: '4. 局部麻醉藥主要作用機轉為：',
+        options: [
+          { key: 'A', text: 'A. 阻斷鈣離子通道' },
+          { key: 'B', text: 'B. 阻斷鉀離子通道' },
+          { key: 'C', text: 'C. 與鈉離子通道結合使其關閉' },
+          { key: 'D', text: 'D. 刺激乙醯膽鹼釋放' }
+        ],
+        answer: 'C',
+        explanation: '根據投影片 P.32–33，局部麻醉藥會結合在細胞膜上的電壓門控「鈉離子通道 (Na+ channel)」，使其持續維持關閉狀態，讓 Na+ 正電荷無法進入神經細胞，從而阻斷去極化與動作電位傳導。'
+      },
+      {
+        qNum: 5,
+        hintBadge: '對應中央大島【考點提示 #5】',
+        slideRef: '投影片 P.40–42',
+        question: '5. 局部麻醉藥中毒最重要的救命治療為：',
+        options: [
+          { key: 'A', text: 'A. 抗組織胺注射' },
+          { key: 'B', text: 'B. 靜脈輸液' },
+          { key: 'C', text: 'C. 脂肪復甦療法 (Lipid emulsion)' },
+          { key: 'D', text: 'D. 高劑量類固醇' }
+        ],
+        answer: 'C',
+        explanation: '根據投影片 P.40–42，局部麻醉藥全身毒性 (LAST) 一旦出現嚴重中樞或心血管症狀，最重要的救命治療為給予 20% 脂肪乳劑（SMOFlipid 20%，脂肪復甦療法），利用脂肪粒子包住局部麻醉藥帶往肝臟與肌肉代謝。'
+      }
+    ];
+
+    // 5. 鳥獸戲畫青蛙醫師 & 兔兔麻護對話語錄
+    const AVATAR_QUOTES = [
+      {
+        speaker: '青蛙主治醫師 (楊醫師分身)',
+        text: '呱！麻醉中病人蓋著布單，過敏第一個表現往往不是紅疹，而是「低血壓 (46%)」或「氣道壓飆高 (18%)」喔！(P.14)',
+        targetId: 'ISLAND-A'
+      },
+      {
+        speaker: '兔兔麻醉護理師 (學員代表)',
+        text: '筆記筆記！懷疑過敏性休克，去工作室藥櫃拿「過敏抽血包」，黃紅頭管抽 5ml T1，白班送後棟3F AIR實驗室(#3350)，值班先call檢驗部(#4570)！(P.20)',
+        targetId: 'ISLAND-C'
+      },
+      {
+        speaker: '兔兔麻醉護理師 (學員代表)',
+        text: '遇到 LAST 局麻藥中毒，千萬別慌！立刻衝去「PCA 鐵櫃最右邊鐵箱」抱出 SMOFlipid 20%，Bolus 1.5 ml/kg 先推！(P.40)',
+        targetId: 'ISLAND-F'
+      },
+      {
+        speaker: '青蛙主治醫師 (楊醫師分身)',
+        text: '呱！超重要陷阱題：過敏休克跟 LAST 都要用 Epinephrine，但 LAST 的 Epinephrine 必須減量到 ≤ 1 mcg/kg，而且絕對禁用 Vasopressin！(P.40)',
+        targetId: 'ISLAND-F'
+      },
+      {
+        speaker: '兔兔麻醉護理師 (學員代表)',
+        text: '一罐 2% Xylocaine (20ml) 就有 400mg！60 公斤大人不加 Epi 極量才 270mg (13.5ml)，打超過三分之二罐就可能耳鳴舌麻中毒啦！(P.35)',
+        targetId: 'ISLAND-D'
+      }
+    ];
+
+    // 狀態管理變數
+    let state = {
+      timeOfDay: 'day', // 'day' | 'dusk' | 'night'
+      viewMode: 'map',  // 'map' | 'list'
+      showCollabLines: false,
+      selectedIslandId: 'CENTER',
+      selectedHintId: 'HINT-1',
+      instructorUnlocked: false,
+      searchQuery: '',
+      activeModal: null,
+      patientWeight: 60,
+      quoteIndex: 0,
+      quizAnswers: {},
+      quizSubmitted: false,
+      visitedHints: ['HINT-1'],
+      visitedIslands: ['CENTER']
+    };
+
+    // 緊湊直向六角群島座標 (680 x 760)
+    const islandCoords = {
+      CENTER: { x: 340, y: 380, r: 145 },
+      'ISLAND-A': { x: 185, y: 125, r: 112 },
+      'ISLAND-B': { x: 495, y: 125, r: 112 },
+      'ISLAND-C': { x: 550, y: 380, r: 112 },
+      'ISLAND-D': { x: 495, y: 635, r: 112 },
+      'ISLAND-E': { x: 185, y: 635, r: 112 },
+      'ISLAND-F': { x: 130, y: 380, r: 112 }
+    };
+
+    const centerLandmarkOffsets = [
+      { id: 'HINT-1', dx: 0, dy: -82 },
+      { id: 'HINT-2', dx: 84, dy: -22 },
+      { id: 'HINT-3', dx: 54, dy: 66 },
+      { id: 'HINT-4', dx: -54, dy: 66 },
+      { id: 'HINT-5', dx: -84, dy: -22 }
+    ];
+
+    function getHexPoints(cx, cy, radius, squash = 0.85) {
+      const angles = [0, 60, 120, 180, 240, 300];
+      return angles
+        .map((deg) => {
+          const rad = (Math.PI / 180) * deg;
+          const px = cx + radius * Math.cos(rad);
+          const py = cy + radius * Math.sin(rad) * squash;
+          return `${px.toFixed(1)},${py.toFixed(1)}`;
+        })
+        .join(' ');
+    }
+
+    function getEnvTheme() {
+      if (state.timeOfDay === 'dusk') {
+        return {
+          bgClass: 'bg-gradient-to-br from-orange-950 via-rose-900 to-amber-900',
+          waterStop1: '#7C2D12',
+          waterStop2: '#4C0519',
+          gridStroke: 'rgba(251, 191, 36, 0.16)'
+        };
+      }
+      if (state.timeOfDay === 'night') {
+        return {
+          bgClass: 'bg-gradient-to-br from-slate-950 via-indigo-950 to-cyan-950',
+          waterStop1: '#090D16',
+          waterStop2: '#0F172A',
+          gridStroke: 'rgba(56, 189, 248, 0.14)'
+        };
+      }
+      return {
+        bgClass: 'bg-gradient-to-br from-sky-200 via-cyan-100 to-teal-200',
+        waterStop1: '#BAE6FD',
+        waterStop2: '#67E8F9',
+        gridStroke: 'rgba(14, 116, 144, 0.16)'
+      };
+    }
+
+    // 切換日夜時段
+    function setTimeOfDay(mode) {
+      state.timeOfDay = mode;
+      const body = document.getElementById('app-body');
+      const theme = getEnvTheme();
+      body.className = `min-h-screen w-full transition-colors duration-700 ${theme.bgClass} flex flex-col select-none overflow-x-hidden pb-10`;
+
+      ['day', 'dusk', 'night'].forEach((m) => {
+        const btn = document.getElementById(`btn-time-${m}`);
+        if (m === mode) {
+          if (m === 'day') btn.className = 'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition bg-sky-400 text-slate-950 shadow';
+          if (m === 'dusk') btn.className = 'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition bg-amber-500 text-slate-950 shadow';
+          if (m === 'night') btn.className = 'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition bg-indigo-500 text-white shadow';
+        } else {
+          btn.className = 'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition text-slate-300 hover:text-white';
+        }
+      });
+      renderSvgMap();
+    }
+
+    // 切換協作線
+    function toggleCollabLines() {
+      state.showCollabLines = !state.showCollabLines;
+      const btn = document.getElementById('btn-collab');
+      if (state.showCollabLines) {
+        btn.className = 'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition bg-amber-500/20 border-amber-400 text-amber-200';
+      } else {
+        btn.className = 'flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition bg-slate-800/80 border-slate-700 text-slate-400 hover:text-white';
+      }
+      renderSvgMap();
+    }
+
+    // 切換地圖 / 清單模式
+    function toggleViewMode() {
+      state.viewMode = state.viewMode === 'map' ? 'list' : 'map';
+      const mapEl = document.getElementById('map-view-container');
+      const listEl = document.getElementById('list-view-container');
+      const iconEl = document.getElementById('icon-view-mode');
+      const textEl = document.getElementById('text-view-mode');
+      const collabBtn = document.getElementById('btn-collab');
+
+      if (state.viewMode === 'map') {
+        mapEl.classList.remove('hidden');
+        listEl.classList.add('hidden');
+        collabBtn.classList.remove('hidden');
+        iconEl.className = 'ph-bold ph-list-magnifying-glass text-teal-400 text-base';
+        textEl.textContent = '全島頁碼清單';
+        renderAll();
+      } else {
+        mapEl.classList.add('hidden');
+        listEl.classList.remove('hidden');
+        collabBtn.classList.add('hidden');
+        iconEl.className = 'ph-bold ph-map-trifold text-amber-400 text-base';
+        textEl.textContent = '返回 3D 學習島';
+        renderListView();
+      }
+    }
+
+    // 選擇島嶼
+    function selectIsland(islandId, hintId = null) {
+      state.selectedIslandId = islandId;
+      if (!state.visitedIslands.includes(islandId)) {
+        state.visitedIslands.push(islandId);
+      }
+      if (hintId) {
+        state.selectedHintId = hintId;
+        if (!state.visitedHints.includes(hintId)) {
+          state.visitedHints.push(hintId);
+        }
+      }
+      renderAll();
+    }
+
+    // 選擇中央大島考點燈塔
+    function selectHint(hintId, event) {
+      if (event) event.stopPropagation();
+      state.selectedIslandId = 'CENTER';
+      state.selectedHintId = hintId;
+      if (!state.visitedHints.includes(hintId)) {
+        state.visitedHints.push(hintId);
+      }
+      renderAll();
+    }
+
+    function toggleInstructorSecret() {
+      state.instructorUnlocked = !state.instructorUnlocked;
+      renderDetailPanel();
+    }
+
+    // 渲染上方雙欄/三欄快速選島面板
+    function renderIslandNavGrid() {
+      const container = document.getElementById('island-nav-grid');
+      const isCenter = state.selectedIslandId === 'CENTER';
+
+      let html = `
+        <button onclick="selectIsland('CENTER')" class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-base sm:text-lg font-black transition shadow-sm border ${
+          isCenter
+            ? 'bg-amber-400 text-slate-950 border-white ring-2 ring-amber-300'
+            : 'bg-slate-800 text-amber-300 border-amber-500/40 hover:bg-slate-700'
+        }">
+          <i class="ph-fill ph-sparkle text-lg"></i>
+          <span>★ 中央大島：課後考點雷達 (5大提示)</span>
+        </button>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2">
+      `;
+
+      SURROUNDING_ISLANDS.forEach((isl) => {
+        const isSelected = state.selectedIslandId === isl.id;
+        html += `
+          <button onclick="selectIsland('${isl.id}')" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left text-sm sm:text-base font-extrabold transition border ${
+            isSelected
+              ? 'bg-white text-slate-950 border-white shadow-md scale-[1.01]'
+              : 'bg-slate-800/90 text-slate-100 border-white/15 hover:bg-slate-700'
+          }">
+            <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${isl.color}"></span>
+            <div class="truncate leading-tight">
+              <div class="truncate">${isl.title}</div>
+              <div class="text-xs font-bold ${isSelected ? 'text-slate-600' : 'text-amber-300/90'}">
+                ${isl.slideRange.replace('投影片 ', '')}
+              </div>
+            </div>
+          </button>
+        `;
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    // 渲染 680x760 3D 群島 SVG
+    function renderSvgMap() {
+      const wrapper = document.getElementById('svg-map-wrapper');
+      const theme = getEnvTheme();
+      const currentHint = CENTER_ISLAND_DATA.landmarks.find((h) => h.id === state.selectedHintId) || CENTER_ISLAND_DATA.landmarks[0];
+
+      // 協作線 SVG
+      let collabSvg = '';
+      if (state.showCollabLines) {
+        collabSvg = `<g>`;
+        COLLABORATION_LINES.forEach((line) => {
+          const p1 = islandCoords[line.from];
+          const p2 = islandCoords[line.to];
+          const midX = (p1.x + p2.x) / 2;
+          const midY = (p1.y + p2.y) / 2 - 22;
+          const isHighlighted = state.selectedIslandId === line.from || state.selectedIslandId === line.to;
+          collabSvg += `
+            <g opacity="${isHighlighted ? '1' : '0.45'}">
+              <path d="M ${p1.x} ${p1.y} Q ${midX} ${midY} ${p2.x} ${p2.y}" fill="none" stroke="${line.color}" stroke-width="${isHighlighted ? 6 : 3}" stroke-opacity="0.4" />
+              <path d="M ${p1.x} ${p1.y} Q ${midX} ${midY} ${p2.x} ${p2.y}" fill="none" stroke="${line.color}" stroke-width="${isHighlighted ? 4 : 2.5}" stroke-dasharray="8 6" class="collab-dash" />
+            </g>
+          `;
+        });
+        collabSvg += `</g>`;
+      }
+
+      // 外圍六座島嶼 SVG
+      let surroundingSvg = '';
+      SURROUNDING_ISLANDS.forEach((isl) => {
+        const coord = islandCoords[isl.id];
+        const isSelected = state.selectedIslandId === isl.id;
+        const isLinked = state.selectedIslandId === 'CENTER' && currentHint.linkedIslandId === isl.id;
+
+        const foamHex = getHexPoints(coord.x, coord.y + 14, coord.r + 10, 0.85);
+        const cliffHex = getHexPoints(coord.x, coord.y + 13, coord.r, 0.85);
+        const topHex = getHexPoints(coord.x, coord.y, coord.r, 0.85);
+        const innerHex = getHexPoints(coord.x, coord.y - 2, coord.r - 10, 0.85);
+
+        const linkedBanner = isLinked
+          ? `
+            <g transform="translate(${coord.x}, ${coord.y - 82})">
+              <rect x="-88" y="-16" width="176" height="30" rx="15" fill="#F59E0B" stroke="#FFFFFF" stroke-width="2" />
+              <text x="0" y="5" text-anchor="middle" fill="#0F172A" font-size="16" font-weight="900">★ ${currentHint.badge} 對應</text>
+            </g>
+          `
+          : '';
+
+        surroundingSvg += `
+          <g class="island-group ${isSelected ? 'island-selected' : ''}" onclick="selectIsland('${isl.id}')">
+            <polygon points="${foamHex}" fill="none" stroke="#E0F2FE" stroke-width="${isSelected || isLinked ? '4.5' : '2'}" stroke-dasharray="10 6" opacity="${isSelected || isLinked ? '0.95' : '0.45'}" />
+            <polygon points="${cliffHex}" fill="#1E293B" stroke="#0F172A" stroke-width="2.5" filter="url(#islandShadow)" />
+            <polygon points="${topHex}" fill="#0F172A" stroke="${isSelected || isLinked ? '#FBBF24' : isl.color}" stroke-width="${isSelected || isLinked ? '6' : '4'}" />
+            <polygon points="${innerHex}" fill="${isl.color}" fill-opacity="${state.timeOfDay === 'day' ? '0.35' : '0.28'}" stroke="${isl.color}" stroke-width="1.5" stroke-opacity="0.6" />
+            ${linkedBanner}
+            <g transform="translate(${coord.x}, ${coord.y - 46})">
+              <rect x="-22" y="-16" width="44" height="28" rx="8" fill="${isl.color}" stroke="#FFFFFF" stroke-width="2.5" />
+              <path d="M -8 -2 H 8 M 0 -10 V 6" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" />
+            </g>
+            <text x="${coord.x}" y="${coord.y - 4}" text-anchor="middle" fill="#FFFFFF" font-size="22" font-weight="900">${isl.shortLines[0]}</text>
+            <text x="${coord.x}" y="${coord.y + 22}" text-anchor="middle" fill="#FFFFFF" font-size="22" font-weight="900">${isl.shortLines[1]}</text>
+            <rect x="${coord.x - 76}" y="${coord.y + 33}" width="152" height="28" rx="14" fill="#020617" fill-opacity="0.9" stroke="${isl.color}" stroke-width="1.8" />
+            <text x="${coord.x}" y="${coord.y + 52}" text-anchor="middle" fill="#FEF08A" font-size="16" font-weight="900">${isl.slideRange.replace('投影片 ', '')}</text>
+          </g>
+        `;
+      });
+
+      // 中央大島 SVG
+      const c = islandCoords.CENTER;
+      const isCenterSelected = state.selectedIslandId === 'CENTER';
+      const cFoamHex = getHexPoints(c.x, c.y + 18, c.r + 14, 0.85);
+      const cCliffHex = getHexPoints(c.x, c.y + 16, c.r, 0.85);
+      const cTopHex = getHexPoints(c.x, c.y, c.r, 0.85);
+      const cInnerHex = getHexPoints(c.x, c.y - 2, c.r - 14, 0.85);
+
+      let beaconsSvg = '';
+      CENTER_ISLAND_DATA.landmarks.forEach((lm, idx) => {
+        const offset = centerLandmarkOffsets[idx];
+        const lx = c.x + offset.dx;
+        const ly = c.y + offset.dy;
+        const isHintActive = state.selectedIslandId === 'CENTER' && state.selectedHintId === lm.id;
+        const isVisited = state.visitedHints.includes(lm.id);
+
+        beaconsSvg += `
+          <g transform="translate(${lx}, ${ly})" onclick="selectHint('${lm.id}', event)" style="cursor: pointer;">
+            ${isHintActive ? `<circle cx="0" cy="0" r="36" fill="none" stroke="#FEF08A" stroke-width="4" class="beacon-pulse" />` : ''}
+            <circle cx="0" cy="0" r="31" fill="${isHintActive ? '#FACC15' : isVisited ? '#0F172A' : '#1E293B'}" stroke="${isHintActive ? '#FFFFFF' : '#F59E0B'}" stroke-width="${isHintActive ? '4' : '3'}" />
+            <text x="0" y="-3" text-anchor="middle" fill="${isHintActive ? '#0F172A' : '#FDE047'}" font-size="16" font-weight="900">考點#${idx + 1}</text>
+            <text x="0" y="15" text-anchor="middle" fill="${isHintActive ? '#1E293B' : '#FFFFFF'}" font-size="13.5" font-weight="900">${lm.slideRef.replace('投影片 ', '').split(',')[0]}</text>
+          </g>
+        `;
+      });
+
+      wrapper.innerHTML = `
+        <svg viewBox="0 0 680 760" class="w-full h-auto block" style="touch-action: manipulation;">
+          <defs>
+            <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="${theme.waterStop1}" />
+              <stop offset="100%" stop-color="${theme.waterStop2}" />
+            </linearGradient>
+            <linearGradient id="centerTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FEF08A" />
+              <stop offset="50%" stop-color="#F59E0B" />
+              <stop offset="100%" stop-color="#D97706" />
+            </linearGradient>
+            <filter id="islandShadow" x="-20%" y="-20%" width="140%" height="150%">
+              <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#020617" flood-opacity="0.48" />
+            </filter>
+          </defs>
+
+          <!-- 海洋背景與等距水波網格 -->
+          <rect x="0" y="0" width="680" height="760" fill="url(#oceanGrad)" />
+          <g stroke="${theme.gridStroke}" stroke-width="1.5" fill="none">
+            <polygon points="${getHexPoints(340, 380, 150, 0.85)}" stroke-dasharray="8 8" />
+            <polygon points="${getHexPoints(340, 380, 235, 0.85)}" stroke-dasharray="8 8" />
+            <polygon points="${getHexPoints(340, 380, 320, 0.85)}" stroke-dasharray="8 8" />
+          </g>
+
+          ${collabSvg}
+          ${surroundingSvg}
+
+          <!-- 中央核心考點大島 -->
+          <g style="cursor: pointer;" onclick="selectIsland('CENTER')">
+            <polygon points="${cFoamHex}" fill="none" stroke="#FDE047" stroke-width="4" stroke-dasharray="12 6" opacity="0.9" />
+            <polygon points="${cCliffHex}" fill="#451A03" stroke="#78350F" stroke-width="3" filter="url(#islandShadow)" />
+            <polygon points="${cTopHex}" fill="#1C1917" stroke="${isCenterSelected ? '#FEF08A' : '#F59E0B'}" stroke-width="${isCenterSelected ? '6' : '4.5'}" />
+            <polygon points="${cInnerHex}" fill="url(#centerTopGrad)" fill-opacity="0.26" stroke="#F59E0B" stroke-width="2" />
+            <g transform="translate(${c.x}, ${c.y})">
+              <ellipse cx="0" cy="6" rx="54" ry="22" fill="#F59E0B" fill-opacity="0.3" />
+              <text x="0" y="-2" text-anchor="middle" fill="#FEF08A" font-size="20" font-weight="900">考點雷達大島</text>
+              <text x="0" y="18" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="bold">點選 1~5 號燈塔</text>
+            </g>
+            ${beaconsSvg}
+          </g>
+
+          <!-- 青蛙醫師與兔兔麻護吉祥物 -->
+          <g transform="translate(340, 210)" style="cursor: pointer;" onclick="nextAvatarQuote()">
+            <circle cx="0" cy="0" r="22" fill="#ECFDF5" stroke="#10B981" stroke-width="3.5" />
+            <text x="0" y="8" text-anchor="middle" font-size="24">🐸</text>
+          </g>
+          <g transform="translate(340, 550)" style="cursor: pointer;" onclick="nextAvatarQuote()">
+            <circle cx="0" cy="0" r="22" fill="#FFF1F2" stroke="#F43F5E" stroke-width="3.5" />
+            <text x="0" y="8" text-anchor="middle" font-size="24">🐰</text>
+          </g>
+        </svg>
+      `;
+    }
+
+    // 渲染右側詳情抽屜
+    function renderDetailPanel() {
+      const container = document.getElementById('detail-panel-container');
+
+      if (state.selectedIslandId === 'CENTER') {
+        const currentHint = CENTER_ISLAND_DATA.landmarks.find((h) => h.id === state.selectedHintId) || CENTER_ISLAND_DATA.landmarks[0];
+        const linkedIsland = SURROUNDING_ISLANDS.find((i) => i.id === currentHint.linkedIslandId);
+
+        let tabsHtml = '';
+        CENTER_ISLAND_DATA.landmarks.forEach((lm, idx) => {
+          const active = state.selectedHintId === lm.id;
+          tabsHtml += `
+            <button onclick="selectHint('${lm.id}')" class="py-3 px-1 rounded-xl text-center transition flex flex-col items-center justify-center border ${
+              active
+                ? 'bg-amber-400 text-slate-950 border-white font-black shadow-lg scale-[1.03]'
+                : 'bg-slate-800/90 text-slate-200 border-slate-700 hover:bg-slate-800'
+            }">
+              <span class="text-sm sm:text-base font-extrabold">考點#${idx + 1}</span>
+              <span class="text-xs mt-0.5 truncate max-w-full px-0.5 ${active ? 'text-slate-900 font-bold' : 'text-amber-400/90'}">
+                ${lm.slideRef.replace('投影片 ', '').split(',')[0]}
+              </span>
+            </button>
+          `;
+        });
+
+        let hintsListHtml = '';
+        currentHint.keyHints.forEach((hintText, i) => {
+          hintsListHtml += `
+            <div class="flex items-start gap-3 bg-slate-800/85 border border-slate-700/80 rounded-2xl p-4 text-base text-slate-100 leading-relaxed">
+              <span class="w-7 h-7 rounded-full bg-amber-500/20 border border-amber-400/50 text-amber-300 font-bold text-sm flex items-center justify-center shrink-0 mt-0.5">
+                ${i + 1}
+              </span>
+              <span>${hintText}</span>
+            </div>
+          `;
+        });
+
+        const secretBoxHtml = state.instructorUnlocked
+          ? `
+            <div class="bg-rose-950/50 border border-rose-500/40 rounded-2xl p-4 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-extrabold text-rose-300 flex items-center gap-1.5">
+                  <i class="ph-bold ph-lock-key-open"></i> 考點核心解答核對
+                </span>
+                <span class="text-sm font-bold text-rose-200">${currentHint.slideRef}</span>
+              </div>
+              <div class="text-lg font-black text-white">🎯 考點核心：${currentHint.instructorSecret.conceptTarget}</div>
+              <p class="text-base text-rose-100/90 leading-relaxed">${currentHint.instructorSecret.deepDive}</p>
+            </div>
+          `
+          : '';
+
+        container.innerHTML = `
+          <div class="rounded-3xl border-2 border-amber-400/50 bg-slate-900/95 text-slate-100 shadow-2xl overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 p-4 sm:p-5 text-slate-950">
+              <div class="flex items-center justify-between">
+                <span class="text-xs sm:text-sm font-black uppercase tracking-wider px-3 py-1 rounded-full bg-slate-950 text-amber-300">
+                  中央核心大島 • 課後測驗雷達站
+                </span>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black mt-2.5 flex items-center gap-2">
+                <i class="ph-fill ph-sparkle text-2xl shrink-0"></i>
+                ${CENTER_ISLAND_DATA.title}
+              </h2>
+              <p class="text-base font-bold text-slate-900/90 mt-1.5 leading-relaxed">
+                請切換下方 5 座「考點提示燈塔」，結合對應投影片頁數複習，並前往外圍六座島嶼深究臨床細節！
+              </p>
+            </div>
+
+            <div class="grid grid-cols-5 gap-1.5 sm:gap-2 p-3 bg-slate-950/60 border-b border-slate-800">
+              ${tabsHtml}
+            </div>
+
+            <div class="p-4 sm:p-5 space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3.5 border-b border-slate-800">
+                <div>
+                  <span class="text-sm font-bold text-amber-400">${currentHint.badge}</span>
+                  <h3 class="text-xl font-extrabold text-white mt-0.5">${currentHint.name}</h3>
+                </div>
+                <div class="flex items-center gap-2 bg-amber-500/15 border border-amber-400/40 rounded-xl px-4 py-2.5 shrink-0">
+                  <i class="ph-bold ph-book-open-text text-xl text-amber-300"></i>
+                  <span class="text-base font-extrabold text-amber-300">${currentHint.slideRef}</span>
+                </div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="text-base font-bold text-teal-300 flex items-center gap-1.5">
+                  <i class="ph-bold ph-question text-xl"></i>
+                  <span>課後測驗重點提示：</span>
+                </div>
+                ${hintsListHtml}
+              </div>
+
+              <div class="bg-teal-950/60 border border-teal-500/30 rounded-2xl p-4 flex items-start gap-2.5">
+                <i class="ph-fill ph-sparkle text-xl text-teal-400 shrink-0 mt-0.5"></i>
+                <div class="text-base text-teal-100 leading-relaxed">
+                  <span class="font-bold text-teal-300">記憶線索：</span>${currentHint.clinicalClue}
+                </div>
+              </div>
+
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+                <button onclick="selectIsland('${currentHint.linkedIslandId}')" class="flex-1 flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 font-extrabold text-base shadow-lg transition">
+                  <i class="ph-bold ph-compass text-xl"></i>
+                  <span>登陸對應課程島（${linkedIsland ? linkedIsland.title : ''}）</span>
+                  <i class="ph-bold ph-caret-right text-lg"></i>
+                </button>
+
+                <button onclick="toggleInstructorSecret()" class="flex items-center justify-center gap-1.5 px-4 py-3.5 rounded-xl text-base font-bold border transition ${
+                  state.instructorUnlocked
+                    ? 'bg-rose-500/20 border-rose-400 text-rose-200'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+                }">
+                  <i class="ph-bold ${state.instructorUnlocked ? 'ph-eye-slash' : 'ph-lock-key'} text-xl"></i>
+                  <span>${state.instructorUnlocked ? '隱藏考點解答' : '核對核心解答'}</span>
+                </button>
+              </div>
+
+              ${secretBoxHtml}
+            </div>
+          </div>
+        `;
+      } else {
+        const currentIsland = SURROUNDING_ISLANDS.find((i) => i.id === state.selectedIslandId) || SURROUNDING_ISLANDS[0];
+
+        let hintRefsHtml = '';
+        if (currentIsland.examHintRef && currentIsland.examHintRef.length > 0) {
+          const btns = currentIsland.examHintRef
+            .map((hId) => {
+              const hObj = CENTER_ISLAND_DATA.landmarks.find((l) => l.id === hId);
+              return `<button onclick="selectHint('${hId}')" class="text-sm font-bold px-3.5 py-1.5 rounded-xl bg-amber-400 text-slate-950 hover:bg-amber-300 transition">查看 ${hObj ? hObj.badge : ''}</button>`;
+            })
+            .join('');
+          hintRefsHtml = `
+            <div class="bg-amber-500/10 border-b border-amber-500/20 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
+              <span class="text-base text-amber-300 font-bold flex items-center gap-1.5">
+                <i class="ph-bold ph-medal text-xl text-amber-400"></i> 本島包含課後測驗考點：
+              </span>
+              <div class="flex items-center gap-2">${btns}</div>
+            </div>
+          `;
+        }
+
+        let buildingsHtml = '';
+        currentIsland.buildings.forEach((b, idx) => {
+          const pointsHtml = b.points
+            .map(
+              (pt) => `
+              <li class="text-base text-slate-100 leading-relaxed flex items-start gap-2.5 whitespace-pre-line">
+                <span class="w-2 h-2 rounded-full mt-2.5 shrink-0" style="background-color: ${currentIsland.color}"></span>
+                <span>${pt}</span>
+              </li>
+            `
+            )
+            .join('');
+
+          buildingsHtml += `
+            <div class="rounded-2xl bg-slate-800/90 border border-slate-700 p-4 space-y-2.5 hover:border-slate-500 transition">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-lg text-sm font-black flex items-center justify-center text-white shrink-0" style="background-color: ${currentIsland.color}">
+                    ${idx + 1}
+                  </span>
+                  <div>
+                    <h3 class="text-lg font-extrabold text-white">${b.name}</h3>
+                    <span class="text-sm text-teal-300 font-semibold">#${b.tag}</span>
+                  </div>
+                </div>
+                <span class="text-sm font-bold px-3 py-1 rounded-lg bg-slate-950 text-amber-300 border border-amber-500/30 shrink-0">
+                  投影片 ${b.slide}
+                </span>
+              </div>
+              <ul class="space-y-2.5 pl-1 pt-1">${pointsHtml}</ul>
+            </div>
+          `;
+        });
+
+        container.innerHTML = `
+          <div class="rounded-3xl border-2 border-white/20 bg-slate-900/95 text-slate-100 shadow-2xl overflow-hidden">
+            <div class="bg-gradient-to-r ${currentIsland.themeBg} p-4 sm:p-5 text-white">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs sm:text-sm font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-black/30">
+                  ${currentIsland.category}
+                </span>
+                <button onclick="selectIsland('CENTER')" class="text-xs sm:text-sm font-bold bg-amber-400 text-slate-950 px-3.5 py-1.5 rounded-full hover:bg-amber-300 transition flex items-center gap-1 shadow">
+                  <i class="ph-fill ph-sparkle"></i> 返回中央考點大島
+                </button>
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black mt-2.5">${currentIsland.title}</h2>
+              <div class="flex flex-wrap items-center gap-2 mt-2 text-sm text-white/95">
+                <span class="bg-black/30 px-3 py-1 rounded-lg font-bold">📑 ${currentIsland.slideRange}</span>
+              </div>
+              <p class="text-base text-white/95 mt-2.5 leading-relaxed">${currentIsland.summary}</p>
+            </div>
+            ${hintRefsHtml}
+            <div class="p-4 space-y-3.5 max-h-[68vh] overflow-y-auto">
+              ${buildingsHtml}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // 渲染底部青蛙醫師與兔兔麻護廣播
+    function renderAvatarBar() {
+      const q = AVATAR_QUOTES[state.quoteIndex];
+      document.getElementById('avatar-emoji-btn').textContent = q.speaker.includes('青蛙') ? '🐸' : '🐰';
+      document.getElementById('avatar-speaker').textContent = q.speaker;
+      document.getElementById('avatar-text').textContent = q.text;
+    }
+
+    function nextAvatarQuote() {
+      state.quoteIndex = (state.quoteIndex + 1) % AVATAR_QUOTES.length;
+      renderAvatarBar();
+    }
+
+    function goToAvatarIsland() {
+      const q = AVATAR_QUOTES[state.quoteIndex];
+      selectIsland(q.targetId);
+    }
+
+    // 清單模式與搜尋渲染
+    function handleSearchInput(val) {
+      state.searchQuery = val;
+      renderListView();
+    }
+
+    function renderListView() {
+      const grid = document.getElementById('search-results-grid');
+      const q = state.searchQuery.trim().toLowerCase();
+      const results = [];
+
+      CENTER_ISLAND_DATA.landmarks.forEach((lm) => {
+        const pool = `${lm.badge} ${lm.name} ${lm.shortHint} ${lm.slideRef} ${lm.keyHints.join(' ')} ${lm.clinicalClue}`.toLowerCase();
+        if (!q || pool.includes(q)) {
+          results.push({
+            type: 'EXAM_HINT',
+            id: lm.id,
+            islandId: 'CENTER',
+            badge: lm.badge,
+            title: lm.name,
+            pageRef: lm.slideRef,
+            details: lm.keyHints,
+            color: '#F59E0B'
+          });
+        }
+      });
+
+      SURROUNDING_ISLANDS.forEach((isl) => {
+        isl.buildings.forEach((b, idx) => {
+          const pool = `${isl.title} ${b.name} ${b.slide} ${b.tag} ${b.points.join(' ')}`.toLowerCase();
+          if (!q || pool.includes(q)) {
+            results.push({
+              type: 'BUILDING',
+              id: `${isl.id}-B${idx}`,
+              islandId: isl.id,
+              badge: isl.title,
+              title: b.name,
+              pageRef: `投影片 ${b.slide}`,
+              details: b.points,
+              color: isl.color
+            });
+          }
+        });
+      });
+
+      grid.innerHTML = results
+        .map((item) => {
+          const detailsHtml = item.details
+            .map((d) => `<li class="flex items-start gap-2"><span class="text-teal-400 font-bold">•</span><span>${d}</span></li>`)
+            .join('');
+          const jumpAction =
+            item.type === 'EXAM_HINT'
+              ? `jumpFromListToHint('${item.id}')`
+              : `jumpFromListToIsland('${item.islandId}')`;
+
+          return `
+            <div class="rounded-2xl bg-slate-800/80 border border-slate-700 p-4 flex flex-col justify-between gap-3 hover:border-teal-400/60 transition">
+              <div class="space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-extrabold px-2.5 py-0.5 rounded-full text-slate-950" style="background-color: ${item.color}">
+                    ${item.badge}
+                  </span>
+                  <span class="text-xs sm:text-sm font-bold text-amber-300 bg-slate-950 px-2.5 py-1 rounded-lg border border-amber-500/30">
+                    ${item.pageRef}
+                  </span>
+                </div>
+                <h3 class="text-base sm:text-lg font-extrabold text-white">${item.title}</h3>
+                <ul class="space-y-2 text-sm text-slate-200 leading-relaxed">${detailsHtml}</ul>
+              </div>
+              <button onclick="${jumpAction}" class="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-950 text-teal-300 text-sm font-bold border border-slate-700 flex items-center justify-center gap-1.5 transition">
+                <i class="ph-bold ph-map-trifold"></i>
+                <span>在 3D 島嶼地圖中定位</span>
+              </button>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    function jumpFromListToHint(hintId) {
+      toggleViewMode();
+      selectHint(hintId);
+    }
+
+    function jumpFromListToIsland(islandId) {
+      toggleViewMode();
+      selectIsland(islandId);
+    }
+
+    // 彈窗管理 (Modals)
+    function openModal(type) {
+      state.activeModal = type;
+      const backdrop = document.getElementById('modal-backdrop');
+      backdrop.classList.remove('hidden');
+      backdrop.classList.add('flex');
+      renderModalContent();
+    }
+
+    function closeModal() {
+      state.activeModal = null;
+      const backdrop = document.getElementById('modal-backdrop');
+      backdrop.classList.add('hidden');
+      backdrop.classList.remove('flex');
+    }
+
+    function setCalcWeight(w) {
+      state.patientWeight = Number(w);
+      renderModalContent();
+    }
+
+    function selectQuizOption(qNum, key) {
+      if (state.quizSubmitted) return;
+      state.quizAnswers[qNum] = key;
+      renderModalContent();
+    }
+
+    function submitQuiz() {
+      state.quizSubmitted = true;
+      renderModalContent();
+    }
+
+    function resetQuiz() {
+      state.quizAnswers = {};
+      state.quizSubmitted = false;
+      renderModalContent();
+    }
+
+    function renderModalContent() {
+      const box = document.getElementById('modal-content');
+      if (!state.activeModal) return;
+
+      if (state.activeModal === 'calculator') {
+        const w = Math.max(10, Math.min(150, Number(state.patientWeight) || 60));
+        const lidoPlainMg = (w * 4.5).toFixed(0);
+        const lidoPlainMl = ((w * 4.5) / 20).toFixed(1);
+        const lidoEpiMg = (w * 7).toFixed(0);
+        const lidoEpiMl = ((w * 7) / 20).toFixed(1);
+        const bupiMg = (w * 3).toFixed(0);
+        const lipidBolusMl = (w * 1.5).toFixed(0);
+        const lipidInfusionMlHr = (w * 15).toFixed(0);
+        const lipidMaxMl = (w * 12).toFixed(0);
+        const midaMin = (w * 0.05).toFixed(1);
+        const midaMax = (w * 0.1).toFixed(1);
+        const lastEpiMaxMcg = (w * 1).toFixed(0);
+        const lastEpiMaxMl = (w * 0.1).toFixed(1);
+        const anaphFluidInitial = w >= 45 ? '2000 ml (成人 2L)' : `${(w * 20).toFixed(0)} ml (20 ml/kg)`;
+        const anaphFluidRefractory = `${(w * 50).toFixed(0)} ml (50 ml/kg)`;
+
+        const presetBtns = [40, 50, 60, 70, 80]
+          .map(
+            (p) => `
+            <button onclick="setCalcWeight(${p})" class="px-3 py-1 rounded-lg text-xs sm:text-sm font-bold transition ${
+              w === p ? 'bg-teal-400 text-slate-950' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+            }">${p} kg</button>
+          `
+          )
+          .join('');
+
+        box.innerHTML = `
+          <div class="bg-slate-900 border-2 border-teal-500/50 rounded-3xl max-w-3xl mx-auto w-full max-h-[90vh] overflow-y-auto text-slate-100 shadow-2xl p-5 sm:p-6 space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div class="flex items-center gap-2.5">
+                <div class="p-2 rounded-xl bg-teal-500/20 text-teal-300">
+                  <i class="ph-bold ph-calculator text-2xl"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg sm:text-xl font-black text-white">麻醉病安體重劑量速算儀</h3>
+                  <p class="text-xs sm:text-sm text-slate-400">對應投影片 P.17–18（過敏輸液/Epi）、P.35（局麻極量）、P.40/P.45（SMOFlipid 20% 劑量表）</p>
+                </div>
+              </div>
+              <button onclick="closeModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300">
+                <i class="ph-bold ph-x text-xl"></i>
+              </button>
+            </div>
+
+            <div class="bg-slate-800/90 rounded-2xl p-4 border border-slate-700 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <label class="text-sm sm:text-base font-bold text-teal-300">設定病患理想體重 (Lean Body Weight)：</label>
+                <div class="flex items-center gap-2">${presetBtns}</div>
+              </div>
+              <div class="flex items-center gap-4">
+                <input type="range" min="20" max="120" step="1" value="${w}" oninput="setCalcWeight(this.value)" class="flex-1 accent-teal-400 cursor-pointer" />
+                <span class="text-2xl font-black text-amber-400 w-24 text-right">${w} kg</span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+              <div class="rounded-2xl bg-cyan-950/50 border border-cyan-500/40 p-4 space-y-2">
+                <div class="text-xs sm:text-sm font-bold text-cyan-300 flex items-center justify-between">
+                  <span>1. 局部麻醉藥極量</span>
+                  <span class="bg-cyan-500/20 px-2 py-0.5 rounded">投影片 P.35</span>
+                </div>
+                <div class="space-y-2 pt-1">
+                  <div>
+                    <div class="text-xs text-slate-300">Lidocaine (無 Epi, 4.5 mg/kg)</div>
+                    <div class="text-base font-black text-white">${lidoPlainMg} mg <span class="text-xs font-semibold text-cyan-300">(2% Xylocaine ${lidoPlainMl} ml)</span></div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-slate-300">Lidocaine (含 Epi, 7 mg/kg)</div>
+                    <div class="text-base font-black text-white">${lidoEpiMg} mg <span class="text-xs font-semibold text-cyan-300">(2% Xylocaine ${lidoEpiMl} ml)</span></div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-slate-300">Bupivacaine / Ropivacaine (3 mg/kg)</div>
+                    <div class="text-base font-black text-white">${bupiMg} mg</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-2xl bg-emerald-950/50 border border-emerald-500/40 p-4 space-y-2">
+                <div class="text-xs sm:text-sm font-bold text-emerald-300 flex items-center justify-between">
+                  <span>2. 20% SMOFlipid 救援</span>
+                  <span class="bg-emerald-500/20 px-2 py-0.5 rounded">投影片 P.40 / P.45</span>
+                </div>
+                <div class="space-y-2 pt-1">
+                  <div>
+                    <div class="text-xs text-slate-300">初始 Bolus (1.5 ml/kg, 2-3分推完)</div>
+                    <div class="text-lg font-black text-emerald-300">${lipidBolusMl} ml IV</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-slate-300">持續滴注 Infusion (15 ml/kg/hr)</div>
+                    <div class="text-base font-black text-white">${lipidInfusionMlHr} ml/hr</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-slate-300">最大總劑量上限 (12 ml/kg)</div>
+                    <div class="text-base font-black text-amber-300">${lipidMaxMl} ml</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-2xl bg-rose-950/50 border border-rose-500/40 p-4 space-y-2">
+                <div class="text-xs sm:text-sm font-bold text-rose-300 flex items-center justify-between">
+                  <span>3. 急救用藥與輸液</span>
+                  <span class="bg-rose-500/20 px-2 py-0.5 rounded">投影片 P.18 / P.40</span>
+                </div>
+                <div class="space-y-2 pt-1">
+                  <div>
+                    <div class="text-xs text-slate-300">LAST Epinephrine 減量上限 (≤1 mcg/kg)</div>
+                    <div class="text-base font-black text-rose-300">≤ ${lastEpiMaxMcg} mcg <span class="text-xs text-slate-200">(10mcg/ml 抽 ≤${lastEpiMaxMl} ml)</span></div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-slate-300">LAST 抗癲癇 Midazolam (0.05-0.1 mg/kg)</div>
+                    <div class="text-base font-black text-white">${midaMin} – ${midaMax} mg (ml)</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-slate-300">過敏性休克晶體輸液 (Crystalloid)</div>
+                    <div class="text-xs font-bold text-amber-200">立即：${anaphFluidInitial}<br/>頑固型：${anaphFluidRefractory}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (state.activeModal === 'sopCompare') {
+        box.innerHTML = `
+          <div class="bg-slate-900 border-2 border-indigo-500/50 rounded-3xl max-w-4xl mx-auto w-full max-h-[90vh] overflow-y-auto text-slate-100 shadow-2xl p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <h3 class="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+                  <i class="ph-bold ph-stack text-indigo-400"></i>
+                  麻醉兩大重大病安急症：中榮實戰處理對照表
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-400 mt-0.5">
+                  整合簡報最後兩頁重點（投影片 P.44 過敏性休克處理流程 vs P.45 LAST 局部麻醉藥全身毒性）
+                </p>
+              </div>
+              <button onclick="closeModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300">
+                <i class="ph-bold ph-x text-xl"></i>
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                  <tr class="bg-slate-800 text-slate-200">
+                    <th class="p-3 rounded-tl-xl w-1/5">比較項目</th>
+                    <th class="p-3 text-rose-300 w-2/5 border-l border-slate-700">🚨 重度藥物過敏 (Anaphylaxis) [投影片 P.20, P.44]</th>
+                    <th class="p-3 text-emerald-300 rounded-tr-xl w-2/5 border-l border-slate-700">⚡ 局部麻醉藥全身毒性 (LAST) [投影片 P.40, P.45]</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                  <tr>
+                    <td class="p-3 font-bold text-amber-300">致病機轉</td>
+                    <td class="p-3 border-l border-slate-800">IgE 結合肥胖細胞/嗜鹼性球 → 釋放 Histamine 等介質 → 10-15分鐘內 35-70% 血液外滲 (P.3-7)</td>
+                    <td class="p-3 border-l border-slate-800">局麻藥阻斷電壓門控鈉離子通道 (Na+ channel)，過量或誤入血管引發中樞與心臟毒性 (P.32-39)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-amber-300">中榮急救箱位置</td>
+                    <td class="p-3 border-l border-slate-800 font-semibold text-white">📦 工作室藥櫃內：「升壓劑＋過敏抽血包」 (P.20)</td>
+                    <td class="p-3 border-l border-slate-800 font-semibold text-white">🗄️ PCA 鐵櫃裡最右邊鐵箱：「SMOFlipid 20% (250ml/瓶)」 (P.40)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-amber-300">首要救命神藥</td>
+                    <td class="p-3 border-l border-slate-800"><span class="font-extrabold text-rose-300">腎上腺素 Epinephrine</span><br/>• 中度：10–20 mcg IV<br/>• 危及生命：100–200 mcg IV<br/>• 心跳停止：1 mg IV；Infusion：60 mcg/ml (P.17)</td>
+                    <td class="p-3 border-l border-slate-800"><span class="font-extrabold text-emerald-300">20% 脂肪乳劑 (Lipid emulsion)</span><br/>• Bolus：1.5 ml/kg IV (2-3分鐘內)<br/>• Infusion：15 ml/kg/hr (上限 12 ml/kg) (P.40)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-amber-300">Epinephrine 劑量差異</td>
+                    <td class="p-3 border-l border-slate-800">第一線主力升壓支氣管擴張藥，依嚴重度足量給予 (10~200 mcg 或 CPR 1 mg)</td>
+                    <td class="p-3 border-l border-slate-800 text-amber-200 font-semibold">⚠️ 必須減少 Epinephrine 劑量至 ≤ 1 mcg/kg！（避免惡化心律不整與干擾脂乳作用）</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-amber-300">禁忌 / 注意用藥</td>
+                    <td class="p-3 border-l border-slate-800">補液首選 Crystalloid (2L)，注意 Colloid 本身也可能引起過敏 (P.18)</td>
+                    <td class="p-3 border-l border-slate-800">🚫 避免 Vasopressin、β-blocker、CCB、其他局麻藥；血行動力不穩禁用 Propofol (P.40)</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-amber-300">抽血與後續流程</td>
+                    <td class="p-3 border-l border-slate-800">抽 5ml 黃紅頭管測 <span class="font-bold text-rose-300">β-tryptase</span>（45-60分達高峰）：<br/>• T1 (2hr內)：白班送3F AIR實驗室(#3350) / 值班電聯檢驗部(#4570)<br/>• T2 (24-48hr)：貼病歷交班恢復室；麻單右下角勾 QA</td>
+                    <td class="p-3 border-l border-slate-800">血行動力穩定後 Lipid 續滴 10 分鐘；心律不整用 Amiodarone；嚴重時啟動葉克膜 ECMO team (P.40, P.42)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      } else if (state.activeModal === 'quiz') {
+        let score = 0;
+        POST_TEST_QUESTIONS.forEach((q) => {
+          if (state.quizAnswers[q.qNum] === q.answer) score += 1;
+        });
+
+        const questionsHtml = POST_TEST_QUESTIONS.map((q) => {
+          const userSelected = state.quizAnswers[q.qNum];
+          const isCorrect = userSelected === q.answer;
+
+          const optsHtml = q.options
+            .map((opt) => {
+              const chosen = userSelected === opt.key;
+              let btnStyle = 'bg-slate-900 border-slate-700 text-slate-200 hover:border-amber-400/60';
+              if (state.quizSubmitted) {
+                if (opt.key === q.answer) {
+                  btnStyle = 'bg-emerald-950/90 border-emerald-400 text-emerald-200 font-bold';
+                } else if (chosen && opt.key !== q.answer) {
+                  btnStyle = 'bg-rose-950/90 border-rose-400 text-rose-200';
+                }
+              } else if (chosen) {
+                btnStyle = 'bg-amber-400 text-slate-950 border-white font-bold shadow';
+              }
+              return `
+                <button onclick="selectQuizOption(${q.qNum}, '${opt.key}')" class="text-left px-3.5 py-3 rounded-xl border text-sm sm:text-base transition ${btnStyle}">
+                  ${opt.text}
+                </button>
+              `;
+            })
+            .join('');
+
+          const expHtml = state.quizSubmitted
+            ? `
+              <div class="p-3.5 rounded-xl text-sm leading-relaxed border ${
+                isCorrect ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-100' : 'bg-rose-950/40 border-rose-500/40 text-rose-100'
+              }">
+                <div class="font-extrabold mb-1">${isCorrect ? `✅ 答對了！正確答案：${q.answer}` : `❌ 答錯囉！正確答案為：${q.answer}`}</div>
+                <p>${q.explanation}</p>
+              </div>
+            `
+            : '';
+
+          return `
+            <div class="rounded-2xl bg-slate-800/80 border border-slate-700 p-4 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs sm:text-sm font-bold text-amber-300 bg-amber-500/15 px-2.5 py-0.5 rounded-full border border-amber-400/30">${q.hintBadge}</span>
+                <span class="text-xs sm:text-sm text-teal-300 font-semibold">📖 對應頁數：${q.slideRef}</span>
+              </div>
+              <h4 class="text-base sm:text-lg font-extrabold text-white">${q.question}</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${optsHtml}</div>
+              ${expHtml}
+            </div>
+          `;
+        }).join('');
+
+        const footerHtml = state.quizSubmitted
+          ? `
+            <div class="flex items-center gap-3">
+              <span class="text-base sm:text-lg font-black text-amber-400">🎉 測驗得分：${score} / ${POST_TEST_QUESTIONS.length} 題（${score * 20} 分）</span>
+              <button onclick="resetQuiz()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-bold text-slate-200">重新測驗</button>
+            </div>
+          `
+          : `
+            <span class="text-sm text-slate-400">已作答 ${Object.keys(state.quizAnswers).length} / 5 題</span>
+            <button onclick="submitQuiz()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 font-black text-sm sm:text-base shadow-lg hover:from-amber-300 hover:to-orange-400 transition">
+              送出批改並查看頁碼解析
+            </button>
+          `;
+
+        box.innerHTML = `
+          <div class="bg-slate-900 border-2 border-amber-400/60 rounded-3xl max-w-3xl mx-auto w-full max-h-[90vh] overflow-y-auto text-slate-100 shadow-2xl p-5 sm:p-6 space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <span class="text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-950">課後測驗自我驗收站</span>
+                <h3 class="text-xl font-black text-white mt-1">過敏及局部麻醉藥中毒 — 單選題闖關驗收</h3>
+                <p class="text-xs sm:text-sm text-slate-400">完成中央大島 5 座考點提示與對應頁碼複習後，可在此進行課後測驗模擬作答！</p>
+              </div>
+              <button onclick="closeModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300">
+                <i class="ph-bold ph-x text-xl"></i>
+              </button>
+            </div>
+            <div class="space-y-4">${questionsHtml}</div>
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800">
+              ${footerHtml}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function updateProgressBadges() {
+      const hEl = document.getElementById('progress-hints');
+      const iEl = document.getElementById('progress-islands');
+      if (hEl) hEl.textContent = `${state.visitedHints.length} / 5`;
+      if (iEl) iEl.textContent = `${state.visitedIslands.length} / 7`;
+    }
+
+    function renderAll() {
+      updateProgressBadges();
+      renderIslandNavGrid();
+      renderSvgMap();
+      renderDetailPanel();
+      renderAvatarBar();
+    }
+
+    // 啟動初始化與吉祥物自動輪播
+    window.onload = function () {
+      renderAll();
+      setInterval(() => {
+        nextAvatarQuote();
+      }, 7500);
+    };
+  </script>
+</body>
+</html>
